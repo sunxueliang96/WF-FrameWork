@@ -211,3 +211,62 @@ def get_list_with_sizes(d):
         return test_list, train_list
 
 
+def load_cell(fname, time=0, ext=".cell"):
+    #time = 0 means don't load packet times (saves time and memory)
+    data = []
+    starttime = -1
+    try:
+        f = open(fname, "r")
+        lines = f.readlines()
+        f.close()
+
+        if ext == ".htor":
+            #htor actually loads into a cell format
+            for li in lines:
+                psize = 0
+                if "INCOMING" in li:
+                    psize = -1
+                if "OUTGOING" in li:
+                    psize = 1
+                if psize != 0:
+                    if time == 0:
+                        data.append(psize)
+                    if time == 1:
+                        time = float(li.split(" ")[0])
+                        if (starttime == -1):
+                            starttime = time
+                        data.append([time - starttime, psize])
+
+        if ext == ".cell":
+            for li in lines:
+                li = li.split("\t")
+                p = int(li[1])
+                if time == 0:
+                    data.append(p)
+                if time == 1:
+                    t = float(li[0])
+                    if (starttime == -1):
+                        starttime = t
+                    data.append([t-starttime, p])
+        if ext == ".burst":
+            #data is like: 1,1,1,-1,-1\n1,1,1,1,-1,-1,-1
+            for li in lines:
+                burst = [0, 0]
+                li = li.split(",")
+                data.append([li.count("1"), li.count("-1")])
+                for l in li:
+                    if l == "1":
+                        burst[0] += 1
+                    if l == "-1":
+                        burst[1] += 1
+                data.append(burst)
+
+        if ext == ".pairs":
+            #data is like: [[3, 12], [1, 24]]
+            #not truly implemented
+            data = list(lines[0])            
+    except:
+        print "Could not load", fname
+        sys.exit(-1)
+    return data
+
