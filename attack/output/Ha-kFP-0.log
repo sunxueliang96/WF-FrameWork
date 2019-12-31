@@ -1,0 +1,6 @@
+1577793919.409604	Ha-kFP.py options
+{'LEV_METHOD': 1, 'CLOSED_SITENUM': 100, 'DATA_TYPE': 'cell', 'OPEN_INSTNUM': 1000, 'WEIGHT_LIST': 'output/weightlist', 'FOLD_NUM': 0, 'CLOSED_INSTNUM': 10, 'GEN_OWN_LIST': 1, 'TRAIN_LIST': 'output/trainlist', 'FOLD_MODE': 3, 'FOLD_TOTAL': 10, 'DO_NOT_EXTRACT': 0, 'TEST_LIST': 'output/testlist', 'DATA_LOC': '../data/walkiebatch/', 'CORE_NAME': 0, 'OUTPUT_LOC': 'output/', 'OPEN': 1}
+1577794000.379556	Ha-kFP.py options
+{'LEV_METHOD': 1, 'CLOSED_SITENUM': 100, 'DATA_TYPE': 'cell', 'OPEN_INSTNUM': 1000, 'WEIGHT_LIST': 'output/weightlist', 'FOLD_NUM': 0, 'CLOSED_INSTNUM': 10, 'GEN_OWN_LIST': 1, 'TRAIN_LIST': 'output/trainlist', 'FOLD_MODE': 3, 'FOLD_TOTAL': 10, 'DO_NOT_EXTRACT': 0, 'TEST_LIST': 'output/testlist', 'DATA_LOC': '../data/walkiebatch/', 'CORE_NAME': 0, 'OUTPUT_LOC': 'output/', 'OPEN': 1}
+1577765687.043074	Ha-kFP.py options
+{'LEV_METHOD': 1, 'CLOSED_SITENUM': 100, 'DATA_TYPE': 'cell', 'OPEN_INSTNUM': 1000, 'WEIGHT_LIST': 'output/weightlist', 'FOLD_NUM': 0, 'CLOSED_INSTNUM': 10, 'GEN_OWN_LIST': 1, 'TRAIN_LIST': 'output/trainlist', 'FOLD_MODE': 3, 'FOLD_TOTAL': 10, 'DO_NOT_EXTRACT': 0, 'TEST_LIST': 'output/testlist', 'DATA_LOC': '../data/walkiebatch/', 'CORE_NAME': 0, 'OUTPUT_LOC': 'output/', 'OPEN': 1}
