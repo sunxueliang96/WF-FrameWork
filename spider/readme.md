@@ -3,10 +3,12 @@
 Setting your system account that you could run sudo command without inputing password
 Opening one terminal and launch proxy.py
 Opening another ternimal and launch spider.py
+
+
 for single-tab
-### python spider.py single 
+##### python spider.py single 
 for mult-tab
-### python spider.py mult
+##### python spider.py mult
 
 ## for parsing
 You could change the parameter in the very top of parsing.py
