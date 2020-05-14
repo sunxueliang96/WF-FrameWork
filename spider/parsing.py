@@ -42,9 +42,13 @@ def read_packets(target_dir,name):
     first_pkt = packets[0]
     start_time = float(first_pkt.time)
     counts_packet_del = 0
-
-    ids = str(name) + '-' + target_dir.split('-')[-1].split('.')[0]      
-    f = open(save_path+ids,'w')
+    ins = target_dir.split('-')[-1].split('.')[0]
+    ids = str(name) + '-' + ins
+    #print(ins)
+    if ins=='999':
+        f = open(save_path+str(name),'w')
+    else:
+        f = open(save_path+ids,'w')
     for packet in packets:
         size = len(packet)
         if size<=threshold:
