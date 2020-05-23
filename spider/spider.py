@@ -9,7 +9,8 @@ from selenium.webdriver.common.keys import Keys
 from tbselenium.tbdriver import TorBrowserDriver
 import numpy as np
 import threading
-
+import signal
+import psutil
 
 
 Timeout = 30
@@ -25,17 +26,7 @@ sniff_port_tor = 1082
 
 TBB_dir = '/home/sun/Downloads/tor-browser-linux64-9.0.10_en-US/tor-browser_en-US'
 
-def get_url(browser,url):
-    print("thread 1 start")
-    browser.get("https://" + url)
-def get_second_url(browser,url,timeout):
-    print("thread 2 start")
-    time.sleep(timeout)
-    browser.get_screenshot_as_file(figpath + url_1+str(epoch)+'_first'+'.png')
-    browser.get("https://" + url)
-    browser.execute_script("window.open('%s', '_blank')" % url_2)
-    handles = browser.window_handles
-    browser.switch_to.window(handles[-1])
+
 def firfox_proxy(webdriver):
     profile = webdriver.FirefoxProfile()
     profile.set_preference('network.proxy.type', 1)
@@ -49,99 +40,76 @@ def get_pid(name):
     pids = subprocess.check_output(["pidof",name]).split()
     pids_1 = []
     [pids_1.append(int(pid)) for pid in pids]
-    #print(pids_1[0])
     return pids_1
-
+def screensnap(website,epoch):
+    os.system("import -window root "+ figpath + website+str(epoch)+'.png')
+    time.sleep(10)
 def kill(process):
-    pids = get_pid('tcpdump') 
+    pids = get_pid('tcpdump')
     for pid in pids:
         cmd1 = "sudo kill -9 %s" % pid# . # -9 to kill force fully
         os.system(cmd1)
     if (process.wait())==-9 : # this will print -9 if killed force fully, else -15.
        print('tcpdump killed force fully')
+def kill2(proc_pid):
+    process = psutil.Process(proc_pid)
+    for proc in process.children(recursive=True):
+        proc.kill()
+    process.kill()
 def mult_capture(url_1,url_2,epoch):
-
-    profile = firfox_proxy(webdriver)
     if 'tor' in sys.argv:
-        browser = TorBrowserDriver(TBB_dir,socks_port=socks_port,control_port=control_port)
         sniff_port = sniff_port_tor
-        cmd = 'sudo tcpdump -w '+ path+url_1+'-'+str(epoch)+'.cap -s0 -q -i lo port '+ str(sniff_port)
-        tcpdump = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True) 
-        #browser.load_url('http://' + url_1,wait_for_page_body=False)
-        Timegap = np.random.randint(TimegapMin,TimegapMax)
-        y_split.append(Timegap)
-        print('Opening the second tab after ' + str(Timegap) +' seconds')
-
-        page_1 = threading.Thread(target=get_url,kwargs={"browser":browser,"url":url_1})
-        page_2 = threading.Thread(target=get_second_url,kwargs={"browser":browser,"url":url_2,"timeout":Timegap})
-        page_1.start()
-        page_2.start()
-        #page_1.join([Timeout])
-        #page_2.join([Timeout])
-        print('Watting for timeout')
-        time.sleep(Timeout)
-        print('screenshot saved')
-        browser.get_screenshot_as_file(figpath + url_1+str(epoch)+'_second'+'.png')
-
+        cmd_page_1 = 'python browser.py ' + str(url_1) + ' '+ str(epoch) + ' tor mult'
+        cmd_page_2 = 'python browser.py ' + str(url_2) + ' '+ str(epoch) + ' tor' + ' second mult'
     else:
-        browser = webdriver.Firefox(profile)
-        browser.delete_all_cookies()
         sniff_port = sniff_port_http
-        cmd = 'sudo tcpdump -w '+ path+url_1+'-'+str(epoch)+'.cap -s0 -q -i lo port '+ str(sniff_port)
-        tcpdump = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True) 
-        browser.get('http://' + url_1)
-        Timegap = np.random.randint(TimegapMin,TimegapMax)
-        y_split.append(Timegap)
-        print('Opening the second tab after ' + str(Timegap) +' seconds')
-        time.sleep(Timegap)
-        browser.save_screenshot(figpath + url_1+str(epoch)+'_first'+'.png')
-        url_2 = 'http://' + url_2
-        browser.execute_script("window.open('%s', '_blank')" % url_2)
-        handles = browser.window_handles
-        browser.switch_to.window(handles[-1])
-        print('Watting for timeout')
-        time.sleep(Timeout)
-        print('screenshot saved')
-        browser.save_screenshot(figpath + url_1+str(epoch)+'_second'+'.png')
+        cmd_page_1 = 'python browser.py ' + str(url_1) + ' '+ str(epoch)
+        cmd_page_2 = 'python browser.py ' + str(url_2) + ' '+ str(epoch) + ' second'
+    cmd = 'sudo tcpdump -w '+ path+url_1+'-'+str(epoch)+'.cap -s0 -q -i any port '+ str(sniff_port)
+    print(cmd)
+    tcpdump = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True)
+
+    process_page_1 = subprocess.Popen(cmd_page_1,stdout=subprocess.PIPE,shell=True) 
+    Timegap = np.random.randint(TimegapMin,TimegapMax)
+    y_split.append(Timegap)
+    print('Opening the second tab after ' + str(Timegap) +' seconds')
+    print('Watting for Timegap ',Timegap)
+    time.sleep(Timegap)
+    process_page_2 = subprocess.Popen(cmd_page_2,stdout=subprocess.PIPE,shell=True) 
+    print('Watting for Timeout ',Timeout+Timeout+Timeout+Timeout)
+    time.sleep(Timeout+Timeout+Timeout+Timeout)
+    screensnap(website,epoch)
+    #time.sleep(5)
+    kill2(process_page_1.pid)
+    kill2(process_page_2.pid)
     kill(tcpdump)
-    browser.quit()
     print('exit')
     np.save('y_split',y_split) 
 def capture(website,epoch):
-    profile = firfox_proxy(webdriver)
     if 'tor' in sys.argv:
         sniff_port = sniff_port_tor
-        cmd = 'sudo tcpdump -w '+ path+website+'-'+str(epoch)+'.cap -s0 -q -i any port '+ str(sniff_port)
-        print(cmd)
-        tcpdump = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True)
-        browser = TorBrowserDriver(TBB_dir,socks_port=socks_port,control_port=control_port)
-        browser.load_url("https://" + website)
-        print('Watting for timeout ' + str(Timeout))
-        time.sleep(Timeout)
-        print('screenshot saved')
-        browser.get_screenshot_as_file(figpath + website+'-'+str(epoch)+'.png')
-        cmd = "sudo kill " + str(tcpdump.pid)
-        os.system(cmd)
+        cmd_page_1 = 'python browser.py ' + str(website) + ' '+ str(epoch) + ' tor'
     else:
         sniff_port = sniff_port_http
-        cmd = 'sudo tcpdump -w '+ path+website+'-'+str(epoch)+'.cap -s0 -q -i any port '+ str(sniff_port)
-        print(cmd)
-        tcpdump = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True)  
-        browser = webdriver.Firefox(profile)
-        browser.delete_all_cookies()
-        browser.get('http://' + website)
-        print('Watting for timeout ' + str(Timeout))
-        time.sleep(Timeout)
-        print('screenshot saved')
-        browser.save_screenshot(figpath + website+'-'+str(epoch)+'.png')
+        cmd_page_1 = 'python browser.py ' + str(website) + ' '+ str(epoch)
+    cmd = 'sudo tcpdump -w '+ path+website+'-'+str(epoch)+'.cap -s0 -q -i any port '+ str(sniff_port)
+    print(cmd)
+    tcpdump = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True)
+    process_page_1 = subprocess.Popen(cmd_page_1,stdout=subprocess.PIPE,shell=True) 
+    print('Watting for Timeout ',Timeout)
+    time.sleep(Timeout)
+    #time.sleep(5)
+    screensnap(website,epoch)
+    kill2(process_page_1.pid)
     kill(tcpdump)
-    browser.quit()
     print('exit')
+
 with open('websites.txt','r') as f:
     websites = f.readlines()
 with open('websites_non_sensitive.txt','r') as f:
     websites_non_sensitive = f.readlines()
-
+if 'tor' in sys.argv:
+    Timeout = 100
 if 'mult' in sys.argv:
     path = os.getcwd()+'/mult_tab_results/'
     figpath = 'mult_tab_screenshots/'
