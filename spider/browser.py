@@ -31,28 +31,10 @@ def capture(website,epoch):
         browser = webdriver.Firefox(profile)
     browser.delete_all_cookies()
     browser.get('http://' + website)
-    if 'second' in sys.argv:
-        if 'tor' in sys.argv:
-            browser.get_screenshot_as_file(figpath + website+str(epoch)+'_second'+'.png')
-            print(0)
-        else:
-            browser.save_screenshot(figpath + website+str(epoch)+'_second'+'.png')
-            print(1)
-    else:
-        if 'tor' in sys.argv:
-            browser.get_screenshot_as_file(figpath + website+str(epoch)+'.png')
-            print(2)
-        else:
-            browser.save_screenshot(figpath + website+str(epoch)+'.png')
-            print(2)
-    browser.close()
 
 website = sys.argv[1]
 epoch = sys.argv[2]
-if 'mult' in sys.argv:
-    figpath = 'mult_tab_screenshots/'
-else:
-    figpath = 'screenshots/'
+
 try:
     capture(website,epoch)
 except:
