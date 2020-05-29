@@ -1,5 +1,0 @@
-proxy.py
-selenium
-numpy
-tqdm
-scapy
